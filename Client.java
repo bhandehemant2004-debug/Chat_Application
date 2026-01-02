@@ -6,10 +6,10 @@ import java.io.*;
 public class Client {
     public static void main(String[]args){
         int port = 4000;
-        String host = "localhost";
-        String ip_address = "10.70.46.69";
+        String host = "10.70.46.97";   // server's IP address
+
         try{
-            Socket socket = new Socket(host,port);
+            Socket socket = new Socket(host, port);
             DataInputStream input = new DataInputStream(socket.getInputStream());
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             Scanner scanner = new Scanner(System.in);

@@ -9,8 +9,10 @@ public class Server{
     public static void main(String[]args){
         
             try{
-                int Port = 4000;
-                ServerSocket server = new ServerSocket(Port);
+                int Port = 5000;
+                ServerSocket server =
+        new ServerSocket(5000, 50, InetAddress.getByName("0.0.0.0"));
+
                 System.out.println("server is Started on port no :"+ Port);
                 linkedList = new LinkedList<String>();
                 while(true){
