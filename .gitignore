@@ -1,0 +1,12 @@
+# Compiled output
+out/
+
+# Java class files
+*.class
+
+# IDE files
+.idea/
+.vscode/
+
+# OS files
+.DS_Store

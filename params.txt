@@ -1,0 +1,6 @@
+server_ip=10.146.78.202
+server_port=5000
+public_key=BASE64...
+private_key=BASE64...
+key.algorithm=RSA
+key.size=2048
