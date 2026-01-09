@@ -138,7 +138,7 @@ public class IdentityManager {
     /* ================== SERVER INFO ================== */
 
     public String getServerIP() {
-        return params.getProperty("server.ip");
+        return params.getProperty("server_ip");
     }
     public int getPort() {
         String port = params.getProperty("server_port");
