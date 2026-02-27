@@ -14,7 +14,7 @@ public class ChatPanel extends JPanel {
 
         // LEFT: users list
         usersList = new JList<>(new String[]{
-                "Rahul", "Amit", "Neha"
+                "Rahul", "Amit", "Neha","aditi","sneha","priya","rohit","suman","vijay","anil"
         });
         JScrollPane usersScroll = new JScrollPane(usersList);
         usersScroll.setPreferredSize(new Dimension(200, 0));
