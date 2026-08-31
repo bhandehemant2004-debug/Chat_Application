@@ -1,52 +1,44 @@
 package Framework;
 
-
-import java.lang.reflect.*;
+import Framework.annotations.RequestParam;
+import Controller.POST;
+import Controller.Req;
+import Controller.Authenticate;
+import Controller.VALIDATE;
 
 import java.lang.reflect.Method;
-
-
-import Controller.*;
+import java.lang.reflect.Parameter;
 
 public class MethodInvoker {
 
-    public static Object invoke(Method method, Request request)
-            throws Exception {
-
-        Object controller = Request_Mapping.get_controller();
-        
-        Parameter[] params = method.getParameters();
-        //System.out.println("correct requred  parameters are all follows ");
-        for(int i = 0 ;i< params.length ;i++){
-            System.out.print(" "+params[i]);
+    public static Object invoke(Method method, Request request) throws Exception {
+        Object controller = Request_Mapping.getControllerInstance(method);
+        if (controller == null) {
+            throw new IllegalStateException("No IoC controller instance registered for method: " + method.getName());
         }
-        //System.out.println("correct available  parameters are all follows ");
-        //for(String key:request.params.keySet()){
-          //  System.out.print(" "+request.params.get(key));
-        //}
+
+        Parameter[] params = method.getParameters();
         Object[] args = new Object[params.length];
 
         for (int i = 0; i < params.length; i++) {
+            Parameter param = params[i];
 
-            if (params[i].isAnnotationPresent(POST.class)) {
-                POST p = params[i].getAnnotation(POST.class);
-                
+            if (param.isAnnotationPresent(RequestParam.class)) {
+                RequestParam reqParam = param.getAnnotation(RequestParam.class);
+                args[i] = request.params.get(reqParam.value());
+            } else if (param.isAnnotationPresent(POST.class)) {
+                POST p = param.getAnnotation(POST.class);
                 args[i] = request.params.get(p.str());
-                //System.out.println(p.str()+"get the value of : "+ args[i].toString());
-            }
-            if (params[i].isAnnotationPresent(Authenticate.class)) {
-                Authenticate p = params[i].getAnnotation(Authenticate.class);
+            } else if (param.isAnnotationPresent(Authenticate.class)) {
+                Authenticate p = param.getAnnotation(Authenticate.class);
                 args[i] = request.params.get(p.credentials());
-            }
-            if (params[i].isAnnotationPresent(VALIDATE.class)) {
-                VALIDATE p = params[i].getAnnotation(VALIDATE.class);
+            } else if (param.isAnnotationPresent(VALIDATE.class)) {
+                VALIDATE p = param.getAnnotation(VALIDATE.class);
                 args[i] = request.params.get(p.token());
-            }
-            if (params[i].isAnnotationPresent(Req.class)) {
-                //Req p = params[i].getAnnotation(Req.class);
-                
+            } else if (param.isAnnotationPresent(Req.class)) {
                 args[i] = request.thread;
-                //System.out.println(p.str()+"get the value of : "+ args[i].toString());
+            } else if (param.getType().equals(Request.class)) {
+                args[i] = request;
             }
         }
 
