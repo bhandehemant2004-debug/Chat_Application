@@ -1,34 +1,33 @@
 package Framework;
-import java.util.HashMap;
 
+import java.util.HashMap;
 import Thread.Reading_Writing;
+
 public class RequestParser {
 
-    public static Request parse(String raw,Reading_Writing thread) {
-        //System.out.println("parsing a request");
-        String[] parts = raw.split("\\|");
-
+    public static Request parse(String raw, Reading_Writing thread) {
         Request req = new Request();
         req.thread = thread;
-        req.method = parts[0];
-        req.path = parts[1];
-        //System.out.println("half request parsed");
         req.params = new HashMap<>();
 
-        if (parts.length > 2) {
-            //System.out.println("have a length > 2");
-            //System.out.println("message is " + parts[2]);
+        if (raw == null || raw.trim().isEmpty()) {
+            return req;
+        }
+
+        String[] parts = raw.split("\\|", 3);
+        req.method = parts.length > 0 ? parts[0] : "";
+        req.path = parts.length > 1 ? parts[1] : "";
+
+        if (parts.length > 2 && parts[2] != null && !parts[2].trim().isEmpty()) {
             String[] kvs = parts[2].split("&");
             for (String kv : kvs) {
-                
-                String[] p = kv.split("=");
-                req.params.put(p[0], p[1]);
-                //System.out.println("putting a "+p[0]+" as a : "+p[1]);
+                if (kv.trim().isEmpty()) continue;
+                String[] p = kv.split("=", 2);
+                String key = p[0];
+                String val = p.length > 1 ? p[1] : "";
+                req.params.put(key, val);
             }
         }
-        //System.out.println("returning a parse request");
         return req;
     }
 }
-
-

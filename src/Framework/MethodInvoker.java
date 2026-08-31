@@ -1,20 +1,54 @@
 package Framework;
 
 import Framework.annotations.RequestParam;
+import Framework.annotations.SecurePayload;
 import Controller.POST;
 import Controller.Req;
 import Controller.Authenticate;
 import Controller.VALIDATE;
+import Security.IdentityManager;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
 public class MethodInvoker {
 
+    private static IdentityManager identityManager;
+
+    static {
+        try {
+            identityManager = new IdentityManager();
+        } catch (Exception e) {
+            System.err.println("[MethodInvoker] Could not load IdentityManager for security checks: " + e.getMessage());
+        }
+    }
+
     public static Object invoke(Method method, Request request) throws Exception {
         Object controller = Request_Mapping.getControllerInstance(method);
         if (controller == null) {
             throw new IllegalStateException("No IoC controller instance registered for method: " + method.getName());
+        }
+
+        // Security check for @SecurePayload annotated controller actions
+        if (method.isAnnotationPresent(SecurePayload.class)) {
+            SecurePayload securePayload = method.getAnnotation(SecurePayload.class);
+            if (securePayload.verifySignature()) {
+                String signature = request.params.get("signature");
+                String senderPublicKey = request.params.get("publicKey");
+                String message = request.params.get("message");
+
+                if (signature == null || senderPublicKey == null || message == null) {
+                    return "SECURITY_ERROR: Missing cryptographic signature, public key, or message payload!";
+                }
+
+                if (identityManager != null) {
+                    boolean valid = identityManager.verifySignature(message, signature, senderPublicKey);
+                    if (!valid) {
+                        return "SECURITY_ERROR: Cryptographic RSA Signature Verification Failed!";
+                    }
+                    System.out.println("[Security Filter] RSA Signature verified successfully for method: " + method.getName());
+                }
+            }
         }
 
         Parameter[] params = method.getParameters();
